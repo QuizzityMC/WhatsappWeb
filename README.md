@@ -34,6 +34,7 @@ A self-hosted WhatsApp Web alternative built with Baileys library. This project 
 - Node.js 16+ and npm
 - A phone with WhatsApp installed
 - A server/VPS for backend deployment (or run locally)
+- **Active internet connection with access to web.whatsapp.com** (required for WhatsApp connection)
 
 ### Backend Setup
 
@@ -285,10 +286,33 @@ PORT=3000
 
 ## Troubleshooting
 
+### Network Connectivity Issues (IMPORTANT)
+
+**Before starting the backend, check network connectivity:**
+```bash
+cd backend
+npm run check
+```
+
+If you see `❌ FAILED: Cannot resolve web.whatsapp.com`, your environment **cannot reach WhatsApp servers**. This is a common issue in:
+- GitHub Codespaces
+- Some cloud IDEs (Replit, Gitpod, etc.)
+- Corporate/school networks that block WhatsApp
+- Restricted VPS/server environments
+
+**Solutions:**
+- Deploy on a VPS with unrestricted internet access
+- Run locally on your personal computer
+- Use a mobile hotspot instead of restricted network
+- Check firewall/proxy settings
+
+See [TROUBLESHOOTING.md](TROUBLESHOOTING.md#issue-baileys-connection-keeps-failing) for detailed solutions.
+
 ### Connection Issues
 
 1. **QR Code not appearing:**
    - Check backend logs for errors
+   - Run `npm run check` to verify network connectivity
    - Ensure the backend is running and accessible
    - Verify the backend URL in the frontend
 

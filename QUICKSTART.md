@@ -24,9 +24,14 @@ cd backend
 # Install dependencies
 npm install
 
+# Check network connectivity (recommended)
+npm run check
+
 # Start the server
 npm start
 ```
+
+**Important:** If the network check fails, you won't be able to connect to WhatsApp. See the [Troubleshooting Guide](TROUBLESHOOTING.md#issue-baileys-connection-keeps-failing) for solutions.
 
 You should see:
 ```

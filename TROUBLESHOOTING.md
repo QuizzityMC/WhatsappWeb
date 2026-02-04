@@ -63,23 +63,53 @@ This guide helps you resolve common issues when setting up and running the Whats
 
 **Symptoms:**
 - "Connection closed. Reconnect: true" repeated in logs
-- QR code doesn't appear
+- Error: "WebSocket Error (getaddrinfo ENOTFOUND web.whatsapp.com)"
+- QR code doesn't appear or generates repeatedly
 
 **Solutions:**
-1. Delete authentication folder and restart:
+
+1. **Check Internet Connection:**
+   ```bash
+   # Test if you can reach WhatsApp servers
+   ping web.whatsapp.com
+   curl -I https://web.whatsapp.com
+   ```
+   
+2. **Verify DNS Resolution:**
+   ```bash
+   # Check DNS is working
+   nslookup web.whatsapp.com
+   # Or
+   dig web.whatsapp.com
+   ```
+
+3. **Check Firewall/Network Settings:**
+   - Ensure outbound connections to WhatsApp servers are allowed
+   - Check if you're behind a proxy or VPN that might block WhatsApp
+   - Verify port 443 (HTTPS) is not blocked
+   - Some corporate networks or cloud environments block WhatsApp
+
+4. **Environment-Specific Issues:**
+   - **GitHub Codespaces/Cloud IDEs:** May not have access to WhatsApp servers
+   - **Docker:** Ensure network mode is configured correctly
+   - **VPS:** Check if provider blocks WhatsApp traffic
+   
+5. **Delete authentication folder and restart:**
    ```bash
    rm -rf auth_info_baileys
    npm start
    ```
 
-2. Check your internet connection
-
-3. Verify WhatsApp Web is working in your browser
-
-4. Update Baileys to latest version:
+6. **Update Baileys to latest version:**
    ```bash
    npm update @whiskeysockets/baileys
    ```
+
+7. **Try running from a different network:**
+   - If on a restricted network, try from home/mobile hotspot
+   - Some networks (schools, offices) block WhatsApp
+
+**Note:** The backend REQUIRES access to `web.whatsapp.com` to function. If you see "ENOTFOUND web.whatsapp.com", your environment cannot reach WhatsApp servers.
 
 ### Issue: Server crashes on startup
 

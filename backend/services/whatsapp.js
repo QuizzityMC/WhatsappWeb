@@ -19,6 +19,8 @@ class WhatsAppService {
     this.saveCreds = null;
     this.connectionStatus = 'disconnected';
     this.authFolder = path.join(__dirname, '..', 'auth_info_baileys');
+    this.reconnectAttempts = 0;
+    this.maxReconnectAttempts = 10;
     
     // Store chats and contacts in memory
     this.chats = new Map();
@@ -62,24 +64,54 @@ class WhatsAppService {
         const { connection, lastDisconnect, qr } = update;
 
         if (qr) {
-          console.log('QR Code received');
+          console.log('📱 QR Code received - scan with WhatsApp mobile app');
           this.qr = await QRCode.toDataURL(qr);
           this.io.emit('qr', { qr: this.qr });
         }
 
         if (connection === 'close') {
-          const shouldReconnect = 
-            lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut;
+          const statusCode = lastDisconnect?.error?.output?.statusCode;
+          const errorMessage = lastDisconnect?.error?.message || 'Unknown error';
+          const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
           
-          console.log('Connection closed. Reconnect:', shouldReconnect);
+          console.log('Connection closed:', {
+            statusCode,
+            error: errorMessage,
+            shouldReconnect,
+            attempts: this.reconnectAttempts
+          });
+          
+          // Check for network errors
+          if (errorMessage.includes('ENOTFOUND') || errorMessage.includes('getaddrinfo')) {
+            console.error('❌ NETWORK ERROR: Cannot reach WhatsApp servers.');
+            console.error('Please check your internet connection and ensure web.whatsapp.com is accessible.');
+            this.connectionStatus = 'error';
+            this.io.emit('connection-status', { 
+              status: 'error',
+              error: 'Cannot reach WhatsApp servers. Please check your internet connection.'
+            });
+            
+            // Stop reconnecting after max attempts for network errors
+            if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+              console.error(`Max reconnection attempts (${this.maxReconnectAttempts}) reached. Giving up.`);
+              return;
+            }
+          }
+          
           this.connectionStatus = 'disconnected';
           this.io.emit('connection-status', { status: 'disconnected' });
 
           if (shouldReconnect) {
-            setTimeout(() => this.initialize(), 3000);
+            this.reconnectAttempts++;
+            const delay = Math.min(3000 * this.reconnectAttempts, 30000); // Max 30s delay
+            console.log(`Will retry in ${delay/1000}s (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
+            setTimeout(() => this.initialize(), delay);
+          } else {
+            this.reconnectAttempts = 0;
           }
         } else if (connection === 'open') {
-          console.log('Connection opened successfully');
+          console.log('✅ Connection opened successfully');
+          this.reconnectAttempts = 0; // Reset attempts on successful connection
           this.connectionStatus = 'connected';
           this.qr = null;
           this.io.emit('connection-status', { status: 'connected' });

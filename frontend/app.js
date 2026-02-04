@@ -92,6 +92,22 @@ class WhatsAppClient {
                 this.onAuthenticated();
             } else if (data.status === 'disconnected') {
                 this.showQRSection();
+            } else if (data.status === 'error') {
+                this.updateStatus(`Error: ${data.error || 'Connection error'}`);
+                this.qrPlaceholder.innerHTML = `
+                    <div style="color: #d32f2f; text-align: center;">
+                        <h3>⚠️ Connection Error</h3>
+                        <p>${this.escapeHtml(data.error || 'Cannot connect to WhatsApp')}</p>
+                        <p style="font-size: 14px; margin-top: 10px;">
+                            Please check:<br>
+                            • Internet connection<br>
+                            • Backend server logs<br>
+                            • Firewall settings
+                        </p>
+                    </div>
+                `;
+                this.qrCode.style.display = 'none';
+                this.qrPlaceholder.style.display = 'block';
             }
         });
 
