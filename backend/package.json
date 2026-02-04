@@ -1,0 +1,33 @@
+{
+  "name": "whatsapp-web-backend",
+  "version": "1.0.0",
+  "description": "Backend for self-hostable WhatsApp Web alternative",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
+  },
+  "keywords": [
+    "whatsapp",
+    "baileys",
+    "websocket"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.6.0",
+    "better-sqlite3": "^9.2.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "multer": "^2.0.2",
+    "pino": "^8.16.1",
+    "qrcode": "^1.5.3",
+    "uuid": "^9.0.1",
+    "ws": "^8.17.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}
