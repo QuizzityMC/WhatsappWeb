@@ -73,6 +73,8 @@ npm run dev
 
 The backend will start on `http://localhost:3000` by default.
 
+**Note:** If you see "QR Code received" repeatedly or network errors, see [QR_CODE_ISSUE.md](QR_CODE_ISSUE.md) for troubleshooting.
+
 ### Frontend Setup
 
 #### Local Testing
