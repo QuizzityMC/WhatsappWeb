@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Web Alternative</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- QR Code Section -->
+        <div id="qr-section" class="section">
+            <h1>WhatsApp Web</h1>
+            <p>Scan the QR code to log in</p>
+            <div id="qr-container">
+                <div id="qr-placeholder">
+                    <div class="loader"></div>
+                    <p>Waiting for QR code...</p>
+                </div>
+                <img id="qr-code" style="display: none;" alt="QR Code">
+            </div>
+            <p class="status-text" id="connection-status">Connecting to server...</p>
+            <div class="config-section">
+                <label for="backend-url">Backend Server URL:</label>
+                <input type="text" id="backend-url" value="http://localhost:3000" placeholder="http://localhost:3000">
+                <button id="connect-btn" class="btn">Connect</button>
+            </div>
+        </div>
+
+        <!-- Main Chat Interface -->
+        <div id="chat-section" class="section" style="display: none;">
+            <div class="chat-container">
+                <!-- Sidebar with chats list -->
+                <div class="sidebar">
+                    <div class="sidebar-header">
+                        <h2>Chats</h2>
+                        <button id="logout-btn" class="btn btn-small">Logout</button>
+                    </div>
+                    <div class="search-box">
+                        <input type="text" id="search-chat" placeholder="Search chats...">
+                    </div>
+                    <div id="chats-list" class="chats-list">
+                        <div class="no-chats">No chats available</div>
+                    </div>
+                </div>
+
+                <!-- Main chat area -->
+                <div class="main-chat">
+                    <div id="no-chat-selected" class="no-chat-selected">
+                        <h3>Select a chat to start messaging</h3>
+                    </div>
+                    
+                    <div id="chat-window" style="display: none;">
+                        <div class="chat-header">
+                            <h3 id="current-chat-name">Chat Name</h3>
+                        </div>
+                        
+                        <div id="messages-container" class="messages-container">
+                            <!-- Messages will be loaded here -->
+                        </div>
+                        
+                        <div class="message-input-container">
+                            <input type="text" id="message-input" placeholder="Type a message..." autocomplete="off">
+                            <button id="send-btn" class="btn btn-primary">Send</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
