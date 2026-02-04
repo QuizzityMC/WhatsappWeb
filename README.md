@@ -2,6 +2,17 @@
 
 A self-hosted WhatsApp Web alternative built with Baileys library. This project provides a complete separation between frontend and backend, allowing you to deploy the frontend on GitHub Pages while running the backend on your own server.
 
+## ⚠️ Important: Network Requirements
+
+**The backend MUST have unrestricted access to WhatsApp servers** (`web.whatsapp.com`). 
+
+- ✅ **Works:** Personal computer, standard VPS, home network
+- ❌ **Doesn't Work:** GitHub Codespaces, restricted corporate networks, some cloud IDEs
+
+**Before starting, run:** `cd backend && npm run check` to verify connectivity.
+
+**If you see network errors,** see [NETWORK_GUIDE.md](NETWORK_GUIDE.md) for detailed solutions.
+
 ## Features
 
 - 🔐 Server-side authentication and session management

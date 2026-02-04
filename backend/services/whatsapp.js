@@ -35,7 +35,11 @@ class WhatsAppService {
 
   async initialize() {
     try {
-      console.log('Initializing WhatsApp connection...');
+      if (this.reconnectAttempts === 0) {
+        console.log('\n🔌 Initializing WhatsApp connection...');
+      } else {
+        console.log(`\n🔄 Reconnecting (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})...`);
+      }
       
       // Load auth state
       const { state, saveCreds } = await useMultiFileAuthState(this.authFolder);
@@ -44,7 +48,9 @@ class WhatsAppService {
 
       // Get latest Baileys version
       const { version, isLatest } = await fetchLatestBaileysVersion();
-      console.log(`Using Baileys version: ${version.join('.')}, Latest: ${isLatest}`);
+      if (this.reconnectAttempts === 0) {
+        console.log(`📦 Using Baileys v${version.join('.')} ${isLatest ? '(latest)' : ''}`);
+      }
 
       // Create socket connection
       this.sock = makeWASocket({

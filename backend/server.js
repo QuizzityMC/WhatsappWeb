@@ -136,8 +136,14 @@ whatsappService.initialize().catch(err => {
 
 // Start server
 server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`Access the API at http://localhost:${PORT}`);
+  console.log('\n' + '='.repeat(60));
+  console.log('🚀 WhatsApp Web Backend Server Started');
+  console.log('='.repeat(60));
+  console.log(`📡 Server running on port ${PORT}`);
+  console.log(`🌐 Access the API at http://localhost:${PORT}`);
+  console.log('='.repeat(60));
+  console.log('\n💡 Tip: If connection fails, run: npm run check');
+  console.log('   to diagnose network connectivity issues\n');
 });
 
 // Graceful shutdown
