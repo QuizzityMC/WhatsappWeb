@@ -11,7 +11,9 @@ A self-hosted WhatsApp Web alternative built with Baileys library. This project 
 
 **Before starting, run:** `cd backend && npm run check` to verify connectivity.
 
-**If you see network errors,** see [NETWORK_GUIDE.md](NETWORK_GUIDE.md) for detailed solutions.
+📖 **Seeing connection errors?** Read **[SOLUTION_SUMMARY.md](SOLUTION_SUMMARY.md)** for a quick fix guide.
+
+💡 **For detailed information:** See [NETWORK_GUIDE.md](NETWORK_GUIDE.md)
 
 ## Features
 
