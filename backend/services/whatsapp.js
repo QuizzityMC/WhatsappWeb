@@ -3,8 +3,7 @@ const {
   useMultiFileAuthState,
   DisconnectReason,
   fetchLatestBaileysVersion,
-  makeCacheableSignalKeyStore,
-  makeInMemoryStore
+  makeCacheableSignalKeyStore
 } = require('@whiskeysockets/baileys');
 const pino = require('pino');
 const QRCode = require('qrcode');
@@ -20,9 +19,11 @@ class WhatsAppService {
     this.saveCreds = null;
     this.connectionStatus = 'disconnected';
     this.authFolder = path.join(__dirname, '..', 'auth_info_baileys');
-    this.store = makeInMemoryStore({ 
-      logger: pino().child({ level: 'silent', stream: 'store' })
-    });
+    
+    // Store chats and contacts in memory
+    this.chats = new Map();
+    this.contacts = new Map();
+    this.messages = new Map();
     
     // Ensure auth folder exists
     if (!fs.existsSync(this.authFolder)) {
@@ -55,9 +56,6 @@ class WhatsAppService {
         browser: ['WhatsApp Web', 'Chrome', '110.0.0'],
         markOnlineOnConnect: true
       });
-
-      // Bind store
-      this.store.bind(this.sock.ev);
 
       // Handle connection updates
       this.sock.ev.on('connection.update', async (update) => {
@@ -100,6 +98,13 @@ class WhatsAppService {
         console.log('Messages received:', messages.length);
         
         for (const msg of messages) {
+          // Store message
+          const chatId = msg.key.remoteJid;
+          if (!this.messages.has(chatId)) {
+            this.messages.set(chatId, []);
+          }
+          this.messages.get(chatId).push(msg);
+          
           if (!msg.key.fromMe && type === 'notify') {
             this.io.emit('new-message', {
               chatId: msg.key.remoteJid,
@@ -111,12 +116,56 @@ class WhatsAppService {
       });
 
       // Handle chats update
+      this.sock.ev.on('chats.set', ({ chats }) => {
+        console.log('Chats set:', chats.length);
+        chats.forEach(chat => {
+          this.chats.set(chat.id, chat);
+        });
+      });
+
+      this.sock.ev.on('chats.upsert', (chats) => {
+        console.log('Chats upsert:', chats.length);
+        chats.forEach(chat => {
+          this.chats.set(chat.id, chat);
+        });
+        this.io.emit('chats-update', { chats });
+      });
+
       this.sock.ev.on('chats.update', (chats) => {
+        console.log('Chats update:', chats.length);
+        chats.forEach(chat => {
+          const existing = this.chats.get(chat.id);
+          if (existing) {
+            this.chats.set(chat.id, { ...existing, ...chat });
+          }
+        });
         this.io.emit('chats-update', { chats });
       });
 
       // Handle contacts update
+      this.sock.ev.on('contacts.set', ({ contacts }) => {
+        console.log('Contacts set:', contacts.length);
+        contacts.forEach(contact => {
+          this.contacts.set(contact.id, contact);
+        });
+      });
+
+      this.sock.ev.on('contacts.upsert', (contacts) => {
+        console.log('Contacts upsert:', contacts.length);
+        contacts.forEach(contact => {
+          this.contacts.set(contact.id, contact);
+        });
+        this.io.emit('contacts-update', { contacts });
+      });
+
       this.sock.ev.on('contacts.update', (contacts) => {
+        console.log('Contacts update:', contacts.length);
+        contacts.forEach(contact => {
+          const existing = this.contacts.get(contact.id);
+          if (existing) {
+            this.contacts.set(contact.id, { ...existing, ...contact });
+          }
+        });
         this.io.emit('contacts-update', { contacts });
       });
 
@@ -144,7 +193,7 @@ class WhatsAppService {
     }
 
     try {
-      const chats = this.store.chats.all();
+      const chats = Array.from(this.chats.values());
       return chats.map(chat => ({
         id: chat.id,
         name: chat.name || chat.id,
@@ -163,11 +212,17 @@ class WhatsAppService {
     }
 
     try {
-      const messages = await this.sock.loadMessages(chatId, limit);
-      return messages;
+      // Try to fetch messages from Baileys
+      const messages = await this.sock.fetchMessagesFromWA(chatId, limit).catch(() => {
+        // If fetch fails, return stored messages
+        return this.messages.get(chatId) || [];
+      });
+      
+      return messages.slice(-limit);
     } catch (error) {
       console.error('Error getting messages:', error);
-      return [];
+      // Return stored messages as fallback
+      return (this.messages.get(chatId) || []).slice(-limit);
     }
   }
 
@@ -198,7 +253,7 @@ class WhatsAppService {
     }
 
     try {
-      const contacts = Object.values(this.store.contacts);
+      const contacts = Array.from(this.contacts.values());
       return contacts.map(contact => ({
         id: contact.id,
         name: contact.name || contact.notify || contact.verifiedName || contact.id,
@@ -216,7 +271,7 @@ class WhatsAppService {
     }
 
     try {
-      const chats = this.store.chats.all();
+      const chats = Array.from(this.chats.values());
       const groups = chats.filter(chat => chat.id.endsWith('@g.us'));
       return groups.map(group => ({
         id: group.id,
